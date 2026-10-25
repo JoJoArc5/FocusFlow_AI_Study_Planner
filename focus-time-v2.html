@@ -1,0 +1,759 @@
+<html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Focus Time</title>
+<style>
+:root{--bg:#f7f4ff;--card:#ffffff;--ink:#2a2544;--muted:#6f6a8a;--line:#e7e1f7;--coral:#ff5d73;--teal:#00b8a0;--sun:#ffb81c;--violet:#7c3aed;--sky:#0ea5e9;--pink:#ec4899;--lime:#84cc16;--shadow:0 8px 24px rgba(70,55,30,.08);--grad:linear-gradient(120deg,#7a5cf2 0%,#3f9fdc 55%,#15a393 100%)}
+[data-theme=dark]{--bg:#1e1b33;--card:#2a2648;--ink:#f1edff;--muted:#b3acd6;--line:#3d3868;--coral:#ff7d93;--teal:#36d6bd;--sun:#ffc947;--violet:#a78bfa;--sky:#38bdf8;--pink:#f472b6;--lime:#a3e635;--shadow:0 8px 24px rgba(0,0,0,.25)}
+*{box-sizing:border-box}
+body{margin:0;font-family:Inter,system-ui,-apple-system,"Segoe UI",sans-serif;background:var(--bg);color:var(--ink);line-height:1.5;transition:background .3s,color .3s}
+button,input,select{font:inherit;color:inherit}
+button{cursor:pointer;border:0}
+input,select{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:10px 12px;min-width:0}
+button:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid var(--violet);outline-offset:2px}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+
+header.hero{background:linear-gradient(120deg,#7c3aed,#ec4899 45%,#f59e0b 80%,#0ea5e9);color:#fff;padding:30px 20px 70px;position:relative;overflow:hidden}header.hero:after{content:'';position:absolute;right:-60px;top:-80px;width:260px;height:260px;border-radius:50%;background:rgba(255,255,255,.12)}
+.hero-in{max-width:1120px;margin:auto;display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap}
+.hero h1{margin:0;font-size:clamp(26px,3.6vw,36px);letter-spacing:-.6px}
+.hero p{margin:4px 0 0;opacity:.9;font-size:14px}
+.theme-btn{background:rgba(255,255,255,.2);color:#fff;padding:9px 14px;border-radius:999px;font-weight:700;font-size:13px}
+
+nav.tabs{max-width:1120px;margin:-24px auto 0;padding:0 14px;display:flex;gap:6px;flex-wrap:wrap;justify-content:center;position:relative}
+nav.tabs button{background:var(--card);color:var(--muted);padding:10px 16px;border-radius:12px;font-weight:700;font-size:14px;box-shadow:var(--shadow)}
+nav.tabs button.on{background:linear-gradient(120deg,#7c3aed,#ec4899);color:#fff}
+
+main{max-width:1120px;margin:24px auto;padding:0 14px 40px}
+.view{display:none}.view.on{display:block}
+.card{background:var(--card);border:1px solid var(--line);border-radius:20px;padding:20px;box-shadow:var(--shadow);min-width:0;transition:transform .2s}.card:hover{transform:translateY(-2px)}.card h2:before{content:'';display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--pink);margin-right:8px;vertical-align:middle}
+.g2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
+.g3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;align-items:start}
+.span2{grid-column:span 2}
+h2{font-size:17px;margin:0 0 2px}
+.sub{color:var(--muted);font-size:13px;margin:0 0 14px}
+.muted{color:var(--muted)}
+.empty{color:var(--muted);text-align:center;padding:20px;font-size:14px}
+.btn{background:linear-gradient(120deg,#7c3aed,#ec4899);color:#fff;padding:10px 16px;border-radius:12px;font-weight:700;font-size:14px;box-shadow:0 6px 16px rgba(124,58,237,.28)}
+.btn.alt{background:var(--teal)}
+.btn.soft{background:transparent;color:var(--violet);border:1px solid var(--line)}
+.btn.sm{padding:6px 10px;font-size:12px;border-radius:8px}
+.btn.danger{background:transparent;color:var(--coral);border:1px solid var(--line)}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+
+/* dashboard */
+.hello{font-size:22px;font-weight:800;letter-spacing:-.4px;margin:0 0 14px}
+.stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-bottom:16px}
+.stat{border-radius:16px;padding:16px;color:#fff;box-shadow:var(--shadow)}
+.stat b{display:block;font-size:30px;letter-spacing:-.6px;line-height:1.1}
+.stat span{font-size:12px;font-weight:700;opacity:.92}
+.s1{background:linear-gradient(135deg,#7c3aed,#a855f7)}.s2{background:linear-gradient(135deg,#ff5d73,#fb923c)}.s3{background:linear-gradient(135deg,#00b8a0,#84cc16)}.s4{background:linear-gradient(135deg,#0ea5e9,#38bdf8)}
+.week{display:flex;align-items:flex-end;gap:10px;height:150px;padding-top:8px}
+.wb{flex:1;height:100%;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;gap:6px}
+.wbar{width:min(30px,70%);border-radius:9px 9px 4px 4px;background:color-mix(in srgb,var(--violet) 35%,transparent)}
+.wbar.today{background:var(--violet)}
+.wb small{font-size:11px;color:var(--muted)}
+.ring-row{display:flex;gap:16px;align-items:center}
+.ring{width:96px;height:96px;border-radius:50%;flex-shrink:0;display:grid;place-items:center;background:conic-gradient(var(--teal) var(--a,0deg),color-mix(in srgb,var(--teal) 15%,transparent) 0)}
+.ring-in{width:76px;height:76px;border-radius:50%;background:var(--card);display:grid;place-items:center;font-weight:800;font-size:18px}
+.badges{display:flex;flex-wrap:wrap;gap:8px}
+.badge{display:flex;align-items:center;gap:6px;padding:7px 11px;border-radius:999px;background:var(--bg);border:1px dashed var(--line);font-size:12px;font-weight:700;color:var(--muted);filter:grayscale(1);opacity:.7}
+.badge.got{background:color-mix(in srgb,var(--sun) 22%,transparent);border:1px solid var(--sun);color:var(--ink);filter:none;opacity:1}
+
+/* tasks */
+.toolbar{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:12px}
+.toolbar input[type=search]{flex:1;min-width:160px}
+.seg{display:flex;gap:4px;background:var(--bg);border-radius:12px;padding:4px}
+.seg button{background:transparent;color:var(--muted);padding:7px 12px;border-radius:9px;font-size:13px;font-weight:700}
+.seg button.on{background:var(--card);color:var(--violet);box-shadow:var(--shadow)}
+.form-grid{display:grid;grid-template-columns:2fr 1fr 1fr 1fr auto;gap:8px;margin-bottom:14px}
+.form-grid input{width:100%}
+.row{display:flex;align-items:center;gap:12px;padding:12px;border:1px solid var(--line);border-radius:14px;margin-bottom:8px;background:var(--card)}
+.row.done .rtitle{text-decoration:line-through;color:var(--muted)}
+.chk{width:22px;height:22px;border-radius:7px;border:2px solid var(--teal);background:transparent;flex-shrink:0;color:#fff;font-size:13px;padding:0;display:grid;place-items:center}
+.row.done .chk{background:var(--teal)}
+.rt{flex:1;min-width:0}
+.rtitle{font-weight:700;word-break:break-word}
+.rmeta{display:flex;gap:8px;flex-wrap:wrap;font-size:12px;color:var(--muted);margin-top:4px;align-items:center}
+.chip{background:color-mix(in srgb,var(--sky) 18%,transparent);color:var(--sky);padding:2px 8px;border-radius:999px;font-weight:700}
+.pri{padding:2px 8px;border-radius:999px;font-weight:800;text-transform:uppercase;font-size:10px;color:#fff;background:var(--c)}
+.late{color:var(--coral);font-weight:700}
+.ract{display:flex;gap:6px}
+.ghost{background:var(--bg);color:var(--muted);border:1px solid var(--line);padding:6px 10px;border-radius:8px;font-size:12px;font-weight:700}
+.hi{display:flex;gap:10px;font-size:13px;padding:9px 0;border-bottom:1px solid var(--line)}
+.dot{width:9px;height:9px;border-radius:50%;margin-top:6px;flex-shrink:0}
+.hi small{display:block;color:var(--muted);font-size:11px}
+.hist{max-height:420px;overflow:auto}
+
+/* focus */
+.modes{display:flex;gap:6px;justify-content:center;margin-bottom:6px}
+.modes button{background:var(--bg);color:var(--muted);padding:8px 12px;border-radius:10px;font-size:13px;font-weight:700}
+.modes button.on{background:var(--teal);color:#fff}
+.clock{font-size:70px;font-weight:800;letter-spacing:-2px;text-align:center;font-variant-numeric:tabular-nums;margin:8px 0 2px}
+.tcap{text-align:center;color:var(--muted);font-size:13px;margin-bottom:14px}
+.ctl{display:flex;gap:8px;justify-content:center}
+.picks{display:grid;gap:8px;margin-bottom:12px}
+.picks select{width:100%}
+.toggle{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--line)}
+.toggle:last-child{border:0}
+.switch{position:relative;width:46px;height:26px;flex-shrink:0}
+.switch input{opacity:0;width:0;height:0}
+.switch span{position:absolute;inset:0;background:var(--line);border-radius:999px;transition:.2s;cursor:pointer}
+.switch span:before{content:"";position:absolute;width:20px;height:20px;left:3px;top:3px;background:#fff;border-radius:50%;transition:.2s}
+.switch input:checked+span{background:var(--teal)}
+.switch input:checked+span:before{transform:translateX(20px)}
+
+/* flashcards */
+.flash{min-height:200px;border-radius:18px;background:linear-gradient(135deg,color-mix(in srgb,var(--violet) 14%,var(--card)),var(--card));border:1px solid var(--line);display:grid;place-items:center;text-align:center;padding:26px;font-size:20px;font-weight:700;margin-bottom:10px}
+.fcact{display:flex;gap:8px;justify-content:center;flex-wrap:wrap}
+.fcform{display:grid;gap:8px;margin-bottom:12px}
+.fcform input{width:100%}
+
+/* games */
+.mem{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:12px 0}
+.cell{aspect-ratio:1;border-radius:14px;font-size:26px;padding:0;background:linear-gradient(135deg,#9d86ff,#7a5cf2);color:transparent}
+.cell.open{background:var(--bg);border:2px solid var(--line);color:inherit}
+.cell.match{background:color-mix(in srgb,var(--teal) 25%,var(--card));border:2px solid var(--teal)}
+.line{display:flex;justify-content:space-between;font-size:13px;color:var(--muted);flex-wrap:wrap;gap:6px}
+.digits{font-size:42px;font-weight:800;letter-spacing:8px;text-align:center;min-height:62px;margin:14px 0;font-variant-numeric:tabular-nums}
+.rin{display:flex;gap:8px}.rin input{flex:1;text-align:center;letter-spacing:4px;font-size:18px}
+.rx{height:150px;border-radius:16px;display:grid;place-items:center;font-weight:800;font-size:18px;color:#fff;background:var(--violet);cursor:pointer;user-select:none;text-align:center;padding:10px}
+.msg{text-align:center;font-weight:700;min-height:22px;margin-top:10px;font-size:14px}
+.ok{color:var(--teal)}.bad{color:var(--coral)}
+
+/* techniques */
+.techs{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;margin-bottom:16px}
+.tech{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px;text-align:left;box-shadow:var(--shadow);transition:transform .15s}
+.tech:hover{transform:translateY(-2px)}
+.tech.on{outline:2px solid var(--violet)}
+.tech .ic{font-size:26px}.tech h3{margin:6px 0 2px;font-size:15px}.tech p{margin:0;color:var(--muted);font-size:13px}
+.detail ol{padding-left:20px}.detail li{margin-bottom:6px}
+.why{background:color-mix(in srgb,var(--violet) 10%,transparent);border-left:4px solid var(--violet);padding:10px 14px;border-radius:8px;margin-top:10px;font-size:14px}
+
+.quote{background:linear-gradient(120deg,#fde68a,#fbcfe8 50%,#bae6fd);color:#3b2a5a;border-radius:18px;padding:16px 20px;font-weight:700;margin-bottom:16px;box-shadow:var(--shadow);font-size:15px}[data-theme=dark] .quote{background:linear-gradient(120deg,#4c1d95,#831843 50%,#0c4a6e);color:#f5f3ff}.plan-i{display:flex;gap:10px;align-items:center;padding:10px 0;border-bottom:1px solid var(--line)}.plan-i:last-child{border:0}.ins{display:grid;gap:10px}.ins div{background:var(--bg);border-radius:12px;padding:12px;font-size:13px}.ins b{display:block;font-size:20px;color:var(--violet)}.subj-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}.sg{background:var(--card);border:1px solid var(--line);border-left:5px solid var(--c);border-radius:14px;padding:12px;font-size:13px;font-weight:700}.sg b{display:block;font-size:22px;color:var(--c)}.sg span{font-weight:500}.bar-track{height:10px;background:var(--line);border-radius:999px;overflow:hidden;margin-top:10px}.bar-fill{height:100%;background:linear-gradient(90deg,#7c3aed,#ec4899,#f59e0b);border-radius:999px;transition:width .4s}.kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-bottom:16px}.kpi{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:14px;text-align:center}.kpi b{display:block;font-size:24px;color:var(--pink)}.kpi span{font-size:12px;color:var(--muted)}.levels{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;align-items:end}.lv{text-align:center;font-size:12px;color:var(--muted)}.lv i{display:block;border-radius:8px;background:linear-gradient(#f472b6,#7c3aed);margin:0 auto 6px;width:70%}.lv b{color:var(--ink)}.tip-box{background:color-mix(in srgb,var(--teal) 15%,transparent);border-radius:10px;padding:8px 12px;font-size:13px;margin:6px 0 10px;display:inline-block}.eye-msg{font-size:13px;color:var(--muted);margin-bottom:12px;min-height:18px}@media(max-width:900px){.kpis{grid-template-columns:repeat(2,minmax(0,1fr))}}#v-dash{--feat:#7c3aed;--feat2:#a855f7}#v-tasks{--feat:#f97316;--feat2:#fb7185}#v-focus{--feat:#10b981;--feat2:#14b8a6}#v-cards{--feat:#ec4899;--feat2:#d946ef}#v-tech{--feat:#0ea5e9;--feat2:#3b82f6}#v-games{--feat:#f59e0b;--feat2:#eab308}[data-theme=dark] #v-dash{--feat:#a78bfa;--feat2:#c4b5fd}[data-theme=dark] #v-tasks{--feat:#fb923c;--feat2:#fda4af}[data-theme=dark] #v-focus{--feat:#34d399;--feat2:#2dd4bf}[data-theme=dark] #v-cards{--feat:#f472b6;--feat2:#e879f9}[data-theme=dark] #v-tech{--feat:#38bdf8;--feat2:#60a5fa}[data-theme=dark] #v-games{--feat:#fbbf24;--feat2:#fde047}nav.tabs button[data-view=dash].on{background:linear-gradient(120deg,#7c3aed,#a855f7)}nav.tabs button[data-view=tasks].on{background:linear-gradient(120deg,#f97316,#fb7185)}nav.tabs button[data-view=focus].on{background:linear-gradient(120deg,#10b981,#14b8a6)}nav.tabs button[data-view=cards].on{background:linear-gradient(120deg,#ec4899,#d946ef)}nav.tabs button[data-view=tech].on{background:linear-gradient(120deg,#0ea5e9,#3b82f6)}nav.tabs button[data-view=games].on{background:linear-gradient(120deg,#f59e0b,#eab308)}.feat-banner{background:linear-gradient(120deg,var(--feat),var(--feat2));color:#fff;border-radius:18px;padding:16px 20px;margin-bottom:16px;display:flex;align-items:center;gap:14px;box-shadow:0 10px 24px color-mix(in srgb,var(--feat) 30%,transparent)}.feat-banner .fi{font-size:30px}.feat-banner b{display:block;font-size:19px}.feat-banner span{font-size:13px;opacity:.92}.view .card{border-top:4px solid var(--feat)}.view .card h2:before{background:var(--feat)}.view .btn{background:linear-gradient(120deg,var(--feat),var(--feat2));box-shadow:0 6px 16px color-mix(in srgb,var(--feat) 30%,transparent)}.view .btn.soft,.view .btn.danger{background:transparent;box-shadow:none}.view .btn.alt{background:linear-gradient(120deg,#10b981,#14b8a6)}.view .chk{border-color:var(--feat)}.view .row.done .chk{background:var(--feat)}.view .chip{background:color-mix(in srgb,var(--feat) 16%,transparent);color:var(--feat)}.view .tip-box{border-left:4px solid var(--feat)}.view .wbar.today{background:var(--feat)}.view .kpi b{color:var(--feat)}.view .modes button.on{background:linear-gradient(120deg,var(--feat),var(--feat2))}.view .bar-fill{background:linear-gradient(90deg,var(--feat),var(--feat2))}.view .seg button.on{color:var(--feat)}.view .tech.on{outline:2px solid var(--feat)}.view .lv i{background:linear-gradient(var(--feat2),var(--feat))}.view .sg{border-left-color:var(--c)}.view .badge.got{border-color:var(--feat)}.view .mem .cell{background:linear-gradient(135deg,var(--feat),var(--feat2))}#v-cards .flash{background:linear-gradient(135deg,color-mix(in srgb,var(--feat) 14%,var(--card)),var(--card))}#v-sound{--feat:#06b6d4;--feat2:#22d3ee}#v-sudoku{--feat:#22c55e;--feat2:#84cc16}#v-chess{--feat:#6366f1;--feat2:#8b5cf6}#v-typing{--feat:#f43f5e;--feat2:#fb7185}[data-theme=dark] #v-sound{--feat:#22d3ee;--feat2:#67e8f9}[data-theme=dark] #v-sudoku{--feat:#4ade80;--feat2:#a3e635}[data-theme=dark] #v-chess{--feat:#a5b4fc;--feat2:#c4b5fd}[data-theme=dark] #v-typing{--feat:#fb7185;--feat2:#fda4af}nav.tabs button[data-view=sound].on{background:linear-gradient(120deg,#06b6d4,#22d3ee)}nav.tabs button[data-view=sudoku].on{background:linear-gradient(120deg,#22c55e,#84cc16)}nav.tabs button[data-view=chess].on{background:linear-gradient(120deg,#6366f1,#8b5cf6)}nav.tabs button[data-view=typing].on{background:linear-gradient(120deg,#f43f5e,#fb7185)}.feat-banner{position:relative;overflow:hidden}.feat-banner:after{content:'';position:absolute;right:-30px;bottom:-50px;width:150px;height:150px;border-radius:50%;background:rgba(255,255,255,.14)}.view .card{background:linear-gradient(180deg,color-mix(in srgb,var(--feat) 7%,var(--card)),var(--card))}.snd-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-bottom:14px}.snd{background:var(--bg);border:2px solid var(--line);border-radius:16px;padding:16px 8px;text-align:center;font-weight:700;color:var(--ink)}.snd span{display:block;font-size:30px}.snd small{display:block;font-weight:500;color:var(--muted);font-size:11px}.snd.on{border-color:var(--feat);background:color-mix(in srgb,var(--feat) 14%,var(--card))}.vol{display:flex;gap:10px;align-items:center;margin-bottom:8px;font-size:13px;font-weight:700}.vol input{flex:1;accent-color:var(--feat)}.sd-grid{display:grid;grid-template-columns:repeat(9,1fr);max-width:420px;margin:0 auto 12px;border:2px solid var(--ink);border-radius:10px;overflow:hidden}.sc{aspect-ratio:1;border:1px solid var(--line);border-radius:0;background:var(--card);color:var(--feat);font-size:17px;font-weight:700;padding:0}.sc.g{color:var(--ink)}.sc.br{border-right:2px solid var(--ink)}.sc.bb{border-bottom:2px solid var(--ink)}.sc.s{background:color-mix(in srgb,var(--feat) 25%,var(--card))}.sc.w{color:var(--coral);background:color-mix(in srgb,var(--coral) 15%,var(--card))}.pad{display:grid;grid-template-columns:repeat(10,1fr);gap:5px;max-width:420px;margin:0 auto 12px}.pad button{padding:9px 0;border-radius:9px;background:var(--bg);border:1px solid var(--line);font-weight:700;color:var(--ink)}.ch-board{display:grid;grid-template-columns:repeat(8,1fr);max-width:440px;margin:auto;border-radius:12px;overflow:hidden;border:3px solid var(--ink)}.sq{position:relative;border:0;padding:0;display:grid;place-items:center;aspect-ratio:1;font-size:clamp(20px,5vw,34px);line-height:1;cursor:pointer}.sq.lt{background:#f3e9d2}.sq.dk{background:#b58863}.sq.sel{background:#fde68a}.sq.ck{background:#f87171}.sq.mv:after{content:'';position:absolute;width:26%;height:26%;border-radius:50%;background:rgba(0,0,0,.28)}.wp{color:#fff;text-shadow:0 0 3px #000}.bp{color:#111}.ty-text{font-size:20px;line-height:1.7;background:var(--bg);border-radius:14px;padding:16px;min-height:110px;font-family:ui-monospace,Menlo,Consolas,monospace}.tg{color:var(--teal)}.tb{color:var(--coral);background:color-mix(in srgb,var(--coral) 18%,transparent)}.cur{border-bottom:2px solid var(--feat)}.ty-in{width:100%;margin-top:10px;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:16px}.toast{position:fixed;bottom:18px;left:50%;transform:translateX(-50%) translateY(10px);background:var(--ink);color:var(--bg);padding:12px 18px;border-radius:12px;font-size:14px;font-weight:600;opacity:0;pointer-events:none;transition:.25s;z-index:30;max-width:90vw;text-align:center}
+.toast.show{opacity:1;transform:translateX(-50%)}
+footer{text-align:center;color:var(--muted);font-size:12px;margin-top:24px}
+
+@media(max-width:900px){.g2,.g3{grid-template-columns:1fr}.span2{grid-column:auto}.stats{grid-template-columns:repeat(2,minmax(0,1fr))}.form-grid{grid-template-columns:1fr 1fr}}
+@media(max-width:480px){.clock{font-size:54px}.mem{gap:6px}.form-grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body data-theme="light">
+
+<header class="hero">
+  <div class="hero-in">
+    <div><h1>Focus Time</h1><p>Plan your work, study smarter, and train your memory.</p></div>
+    <button class="theme-btn" id="themeBtn" aria-label="Toggle theme">🌙 Night mode</button>
+  </div>
+</header>
+
+<nav class="tabs" aria-label="Sections">
+  <button class='on' data-view='dash'>Today ☀️</button>
+  <button data-view='tasks'>Quest Board 🗺️</button>
+  <button data-view='focus'>Zen Zone 🧘</button>
+  <button data-view='cards'>Brain Cards 🃏</button>
+  <button data-view='tech'>Smart Moves 💡</button>
+  <button data-view='games'>Mind Playground 🎮</button>
+<button data-view='sound'>Calm Sounds 🎵</button><button data-view='sudoku'>Sudoku Garden 🌿</button><button data-view='chess'>Chess Corner ♟️</button><button data-view='typing'>Type Sprint ⌨️</button></nav>
+
+<main>
+
+<!-- DASHBOARD -->
+<section class="view on" id="v-dash"><div class="feat-banner"><span class="fi">🏠</span><div><b>Today ☀️</b><span>Your day at a glance</span></div></div>
+  <p class="hello" id="gTitle"></p><div class="quote" id="quote"></div><div class="g2" style="margin-bottom:16px"><div class="card"><h2>Today’s plan</h2><p class="sub">Your three most important open tasks.</p><div id="plan"></div></div><div class="card"><h2>Insights</h2><p class="sub">What your numbers say so far.</p><div id="insights"></div></div></div>
+  <div class="stats">
+    <div class="stat s1"><span>Total tasks</span><b id="stTotal">0</b></div>
+    <div class="stat s2"><span>Still active</span><b id="stActive">0</b></div>
+    <div class="stat s3"><span>Completed</span><b id="stDone">0</b></div>
+    <div class="stat s4"><span>Focus today</span><b id="stFocus">0m</b></div>
+  </div>
+  <div class="g2">
+    <div class="card">
+      <h2>This week</h2><p class="sub">Focus minutes per day</p>
+      <div class="week" id="week"></div>
+    </div>
+    <div class="card">
+      <h2>Daily goal</h2><p class="sub" id="goalSub"></p>
+      <div class="ring-row">
+        <div class="ring" id="ring"><div class="ring-in" id="ringTxt">0%</div></div>
+        <div class="muted" style="font-size:13px">Adjust your daily target any time in the Focus tab.</div>
+      </div>
+    </div>
+    <div class="card span2">
+      <h2>Badges</h2><p class="sub">Unlock them by studying and finishing tasks.</p>
+      <div class="badges" id="badges"></div>
+    </div>
+    <div class="card span2">
+      <h2>Recent activity</h2><p class="sub">Your latest actions across the app.</p>
+      <div id="recent"></div>
+    </div>
+  </div>
+</section>
+
+<!-- TASKS -->
+<section class="view" id="v-tasks"><div class="feat-banner"><span class="fi">✅</span><div><b>Quest Board</b><span>Plan, prioritise and track everything you need to do</span></div></div><div class="quote" id="taskSummary"></div><div class="subj-grid" id="subjGrid" style="margin-bottom:16px"></div>
+  <div class="card" style="margin-bottom:16px">
+    <h2>Add a task</h2><p class="sub">Give each task a subject, priority and optional due date.</p>
+    <form class="form-grid" id="tForm">
+      <input id="tTitleIn" maxlength="120" placeholder="e.g. Revise chapter 4" aria-label="Task title" required>
+      <select id="tSubjIn" aria-label="Subject"></select>
+      <select id="tPriIn" aria-label="Priority">
+        <option value="high">High</option><option value="medium" selected>Medium</option><option value="low">Low</option>
+      </select>
+      <input id="tDueIn" type="date" aria-label="Due date">
+      <button class="btn" type="submit">Add</button>
+    </form>
+  </div>
+  <div class="g2">
+    <div class="card">
+      <div class="toolbar">
+        <div class="seg" role="group" aria-label="Status">
+          <button class="on" data-tf="all">All</button><button data-tf="active">Active</button><button data-tf="done">Done</button>
+        </div>
+        <select id="tSubFilter" aria-label="Filter by subject"></select>
+        <input type="search" id="tSearch" placeholder="Search tasks…" aria-label="Search tasks">
+      </div>
+      <div id="taskList"></div>
+    </div>
+    <div class="card">
+      <div class="toolbar" style="justify-content:space-between"><div><h2>Task history</h2><p class="sub" style="margin:0">Every change, with time.</p></div><button class="btn danger sm" id="clearHist">Clear</button></div>
+      <div class="hist" id="hist"></div>
+    </div>
+  </div>
+</section>
+
+<!-- FOCUS -->
+<section class="view" id="v-focus"><div class="feat-banner"><span class="fi">⏱️</span><div><b>Zen Zone</b><span>Timed sessions, breaks and eye care</span></div></div><div class="kpis" id="focusKpis"></div>
+  <div class="g2">
+    <div class="card">
+      <h2>Focus timer</h2><p class="sub">Each finished focus block is logged to a subject and task.</p>
+      <div class="modes">
+        <button class="on" data-mode="work">Focus 25</button><button data-mode="short">Break 5</button><button data-mode="long">Long 15</button>
+      </div>
+      <div class="clock" id="clock">25:00</div>
+      <div class="tcap" id="tCap">Ready when you are</div>
+      <div class="picks">
+        <select id="fSubj" aria-label="Subject"></select>
+        <select id="fTask" aria-label="Linked task"></select>
+      </div>
+      <div class="ctl">
+        <button class="btn" id="tStart">Start</button>
+        <button class="btn soft" id="tReset">Reset</button>
+      </div>
+      <p class="sub" style="text-align:center;margin:12px 0 0" id="cycles">Focus blocks this session: 0</p>
+    </div>
+
+    <div class="card">
+      <h2>Goal & eye comfort</h2><button class="btn sm" id="eyeBreak" style="margin-bottom:6px">👁 Start 20-second eye break</button><div class="eye-msg" id="eyeMsg"></div><p class="sub">Small habits protect your focus and your eyes.</p>
+      <div class="toggle"><div><b>Daily goal</b><div class="muted" style="font-size:13px">Minutes of focus you aim for each day</div></div><div style="display:flex;gap:6px;align-items:center"><input id="goalIn" type="number" min="15" max="720" step="15" style="width:90px"><button class="btn sm" id="saveGoal">Save</button></div></div>
+      <div class="toggle"><div><b>20-20-20 reminder</b><div class="muted" style="font-size:13px">Every 20 min, look 20 feet away for 20 seconds</div></div>
+        <label class="switch"><input type="checkbox" id="eyeToggle"><span></span></label></div>
+      <h2 style="margin-top:18px">Session log</h2><p class="sub">Most recent first.</p>
+      <div class="hist" style="max-height:260px" id="sLog"></div>
+    </div>
+  </div>
+</section>
+
+<!-- FLASHCARDS -->
+<section class="view" id="v-cards"><div class="feat-banner"><span class="fi">🃏</span><div><b>Brain Cards</b><span>Build a deck and review it with spaced levels</span></div></div>
+  <div class="g2">
+    <div class="card">
+      <h2>Study</h2><p class="sub" id="fcStats"></p><div class="levels" id="levels"></div>
+      <div class="flash" id="fcFace">Add a card to begin</div>
+      <p class="sub" style="text-align:center" id="fcHint"></p>
+      <div class="fcact" id="fcAct">
+        <button class="btn" id="fcShow">Reveal answer</button>
+        <div id="fcGrade" style="display:none;gap:8px;flex-wrap:wrap;justify-content:center">
+          <button class="btn danger" id="fcAgain">Didn’t know</button>
+          <button class="btn alt" id="fcGood">Knew it</button>
+        </div>
+      </div>
+      <p class="sub" style="text-align:center;margin-top:12px">Cards you know move up levels and appear less often. Missed cards return to level 0.</p>
+    </div>
+    <div class="card">
+      <h2>Create a card</h2><p class="sub">Front is the question, back is the answer.</p>
+      <form class="fcform" id="fcForm">
+        <input id="fcFront" maxlength="200" placeholder="Front (question)" required>
+        <input id="fcBack" maxlength="300" placeholder="Back (answer)" required>
+        <button class="btn" type="submit">Add card</button>
+      </form>
+      <div id="fcList"></div>
+    </div>
+  </div>
+</section>
+
+<!-- TECHNIQUES -->
+<section class="view" id="v-tech"><div class="feat-banner"><span class="fi">🧠</span><div><b>Smart Moves</b><span>Proven methods, with steps and when to use them</span></div></div>
+  <h2>Study techniques</h2><p class="sub">Pick one to see how to use it.</p>
+  <div class="techs" id="techGrid"></div>
+  <div class="card detail" id="techDetail"></div>
+</section>
+
+<!-- GAMES -->
+<section class="view" id="v-games"><div class="feat-banner"><span class="fi">🎮</span><div><b>Mind Playground</b><span>Two-minute warm-ups for memory and reaction speed</span></div></div>
+  <div class="g3">
+    <div class="card">
+      <h2>🧩 Memory match</h2><p class="sub">Flip two cards at a time. Find all 8 pairs in the fewest moves.</p>
+      <div class="line"><span>Moves <b id="mMoves">0</b></span><span>Best <b id="mBest">—</b></span></div>
+      <div class="mem" id="memGrid"></div>
+      <div style="text-align:center"><button class="btn" id="memNew">New game</button></div>
+      <div class="msg" id="memMsg"></div>
+    </div>
+    <div class="card">
+      <h2>🔢 Number recall</h2><p class="sub">Memorise the digits, then type them back. Each round adds one more.</p>
+      <div class="line"><span>Level <b id="rLevel">3</b></span><span>Best <b id="rBest">—</b></span></div>
+      <div class="digits" id="rDigits">Press start</div>
+      <div class="rin"><input id="rIn" inputmode="numeric" maxlength="12" placeholder="type digits" disabled><button class="btn" id="rCheck" disabled>Check</button></div>
+      <div style="text-align:center;margin-top:12px"><button class="btn" id="rStart">Start</button></div>
+      <div class="msg" id="rMsg"></div>
+    </div>
+    <div class="card">
+      <h2>⚡ Reaction test</h2><p class="sub">Wait for green, then click as fast as you can.</p>
+      <div class="line"><span>Best <b id="rxBest">—</b></span></div>
+      <p class="sub" style="margin:8px 0">Click when the box turns green. Don’t click early.</p>
+      <div class="rx" id="rxArea">Click to start</div>
+    </div>
+  </div>
+</section>
+
+<section class='view' id='v-sound'><div class='feat-banner'><span class='fi'>🎵</span><div><b>Calm Sounds</b><span>Generated soundscapes for focus, no streaming needed</span></div></div><div class='g2'><div class='card'><h2>Soundscapes</h2><p class='sub'>Tap one to start, tap again to stop. Keep the volume low.</p><div class='snd-grid'><button class='snd' data-snd='rain'><span>🌧️</span>Gentle rain<small>Soft filtered noise</small></button><button class='snd' data-snd='brown'><span>🌊</span>Deep brown<small>Steady low rumble</small></button><button class='snd' data-snd='pad'><span>🎹</span>Soft pad<small>Calm sustained chord</small></button></div><div class='vol'><label for='vol'>Volume</label><input type='range' id='vol' min='0' max='100' value='20'></div><p class='sub' id='sndStatus'>Silent. Press a sound to begin.</p></div><div class='card'><h2>Honest note</h2><p class='sub'>Steady background sound can mask distracting noise for some people. Research on its effect on focus is mixed, so treat it as comfort, not a guaranteed boost. Keep it below conversation level and take listening breaks.</p></div></div></section><section class='view' id='v-sudoku'><div class='feat-banner'><span class='fi'>🌿</span><div><b>Sudoku Garden</b><span>Grow your logic one number at a time</span></div></div><div class='g2'><div class='card'><div class='seg' style='margin-bottom:12px'><button data-lvl='easy' class='on'>Easy</button><button data-lvl='medium'>Medium</button><button data-lvl='hard'>Hard</button></div><div class='sd-grid' id='sdGrid'></div><div class='pad' id='sdPad'></div><div class='fcact'><button class='btn sm' id='sdCheck'>Check</button><button class='btn sm soft' id='sdHint'>Hint</button><button class='btn sm' id='sdNew'>New puzzle</button></div><p class='sub' id='sdMsg' style='text-align:center'></p></div><div class='card'><h2>How to think</h2><p class='sub'>Scan each row, column and 3×3 box for a number that fits in only one place. Pick a cell, then tap a number or type it. Use Check and Hint sparingly so you still do the reasoning.</p></div></div></section><section class='view' id='v-chess'><div class='feat-banner'><span class='fi'>♟️</span><div><b>Chess Corner</b><span>Play White against a friendly computer</span></div></div><div class='g2'><div class='card'><div class='ch-board' id='chBoard'></div></div><div class='card'><h2>Match</h2><p class='sub' id='chStatus'></p><div class='kpi' style='max-width:160px;margin-bottom:14px'><b id='chWins'>0</b><span>Your wins</span></div><div class='fcact'><button class='btn sm' id='chNew'>New game</button></div><p class='sub' style='margin-top:14px'>Tap a piece to see its moves, then tap a highlighted square. The computer prefers captures but does not plan ahead. Castling and en passant are not included in this version.</p></div></div></section><section class='view' id='v-typing'><div class='feat-banner'><span class='fi'>⌨️</span><div><b>Type Sprint</b><span>Learn touch typing one lesson at a time</span></div></div><div class='g2'><div class='card'><div class='seg' style='margin-bottom:12px'><button class='on' data-ty='home'>Home row</button><button data-ty='words'>Common words</button><button data-ty='sent'>Sentences</button></div><div class='ty-text' id='tyText'></div><input id='tyIn' class='ty-in' placeholder='Start typing here' autocomplete='off' spellcheck='false'><div style='display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-top:12px;font-size:14px'><span>WPM <b id='tyWpm'>—</b></span><span>Accuracy <b id='tyAcc'>—</b></span><span>Best <b id='tyBest'>—</b></span></div><div style='text-align:center;margin-top:12px'><button class='btn' id='tyNext'>New text</button></div></div><div class='card'><h2>Build the habit</h2><p class='sub'>Keep your eyes on the screen, not the keys. Accuracy first, because speed follows once errors drop. Five focused minutes a day beats one long session a week.</p></div></div></section></main>
+<footer>Focus Time · Your data stays in this browser.</footer>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+/* ===== Core ===== */
+const KEY="focustime_v2";
+const $=id=>document.getElementById(id);
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const dk=(d=new Date())=>`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;
+const fmtT=t=>new Date(t).toLocaleString(undefined,{month:"short",day:"numeric",hour:"2-digit",minute:"2-digit"});
+const SUBJ=["General","Math","Science","Languages","Coding","History","Other"];
+const PRI={high:3,medium:2,low:1};
+const PRI_COL={high:"var(--coral)",medium:"var(--sun)",low:"var(--teal)"};
+const TYPE_COL={add:"var(--violet)",done:"var(--teal)",undo:"var(--sun)",del:"var(--coral)",focus:"var(--sky)",card:"var(--violet)"};
+const DEF={tasks:[],history:[],sessions:[],cards:[],best:{},badges:[],goal:120,theme:"light",eye:false};
+let S=load();
+function load(){try{const s=JSON.parse(localStorage.getItem(KEY));if(s)return{...structuredClone(DEF),...s}}catch(e){}return structuredClone(DEF)}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}
+function toast(m){const t=$("toast");t.textContent=m;t.classList.add("show");clearTimeout(t._h);t._h=setTimeout(()=>t.classList.remove("show"),2600)}
+function log(text,type){S.history.unshift({t:Date.now(),text,type});S.history=S.history.slice(0,300)}
+const minsOn=d=>S.sessions.filter(s=>s.day===d).reduce((a,s)=>a+s.mins,0);
+const totalMins=()=>S.sessions.reduce((a,s)=>a+s.mins,0);
+function studyDays(){return new Set(S.sessions.map(s=>s.day))}
+function streak(){const days=studyDays();const d=new Date();if(!days.has(dk(d)))d.setDate(d.getDate()-1);let n=0;while(days.has(dk(d))){n++;d.setDate(d.getDate()-1)}return n}
+
+/* ===== Tabs & theme ===== */
+document.querySelectorAll("[data-view]").forEach(b=>b.onclick=()=>{
+  document.querySelectorAll("[data-view]").forEach(x=>x.classList.toggle("on",x===b));
+  document.querySelectorAll(".view").forEach(v=>v.classList.toggle("on",v.id==="v-"+b.dataset.view));
+  window.scrollTo({top:0,behavior:"smooth"});
+});
+function setTheme(t){S.theme=t;document.body.dataset.theme=t;$("themeBtn").textContent=t==="dark"?"☀️ Day mode":"🌙 Night mode";save()}
+$("themeBtn").onclick=()=>setTheme(S.theme==="dark"?"light":"dark");
+
+/* ===== Tasks ===== */
+let tF="all",tSub="all";
+function addTask(title,subject,priority,due){
+  S.tasks.unshift({id:Date.now(),title,subject,priority,due,done:false,created:Date.now(),completedAt:null,pomos:0});
+  log(`Added “${title}”`,"add");save();renderAll();
+}
+function toggleTask(id){
+  const t=S.tasks.find(x=>x.id===id);if(!t)return;
+  t.done=!t.done;t.completedAt=t.done?Date.now():null;
+  log(`${t.done?"Completed":"Reopened"} “${t.title}”`,t.done?"done":"undo");
+  save();renderAll();toast(t.done?"Nice work. Task completed! 🎉":"Task reopened.");
+}
+function delTask(id){
+  const t=S.tasks.find(x=>x.id===id);if(!t||!confirm("Delete this task?"))return;
+  S.tasks=S.tasks.filter(x=>x.id!==id);log(`Deleted “${t.title}”`,"del");save();renderAll();
+}
+$("tForm").addEventListener("submit",e=>{
+  e.preventDefault();
+  const title=$("tTitleIn").value.trim();if(!title)return;
+  addTask(title.slice(0,120),$("tSubjIn").value,$("tPriIn").value,$("tDueIn").value);
+  $("tTitleIn").value="";$("tDueIn").value="";$("tTitleIn").focus();toast("Task added.");
+});
+document.querySelectorAll("[data-tf]").forEach(b=>b.onclick=()=>{tF=b.dataset.tf;document.querySelectorAll("[data-tf]").forEach(x=>x.classList.toggle("on",x===b));renderTasks()});
+$("tSubFilter").onchange=e=>{tSub=e.target.value;renderTasks()};
+$("tSearch").oninput=renderTasks;
+$("taskList").addEventListener("click",e=>{
+  const row=e.target.closest(".row");if(!row)return;const id=Number(row.dataset.id);
+  if(e.target.closest("[data-toggle]"))toggleTask(id);
+  else if(e.target.closest("[data-del]"))delTask(id);
+  else if(e.target.closest("[data-focus]")){$("fTask").value=String(id);document.querySelector('[data-view="focus"]').click()}
+});
+$("clearHist").onclick=()=>{if(confirm("Clear the task history? Your tasks stay.")){S.history=[];save();renderAll()}};
+
+function renderTasks(){
+  const q=$("tSearch").value.trim().toLowerCase();
+  const list=S.tasks.filter(t=>(tF==="all"||(tF==="done")===t.done)&&(tSub==="all"||t.subject===tSub)&&(!q||t.title.toLowerCase().includes(q)))
+    .sort((a,b)=>a.done-b.done||PRI[b.priority]-PRI[a.priority]||(a.due||"~").localeCompare(b.due||"~"));
+  $("taskList").innerHTML=list.length?list.map(t=>{
+    const late=t.due&&t.due<dk()&&!t.done;
+    return `<div class="row ${t.done?"done":""}" data-id="${t.id}">
+      <button class="chk" data-toggle aria-label="Toggle complete">${t.done?"✓":""}</button>
+      <div class="rt"><div class="rtitle">${esc(t.title)}</div>
+        <div class="rmeta"><span class="chip">${esc(t.subject)}</span><span class="pri" style="--c:${PRI_COL[t.priority]}">${t.priority}</span>${t.due?`<span class="${late?"late":""}">📅 ${esc(t.due)}</span>`:""}<span>🍅 ${t.pomos}</span></div></div>
+      <div class="ract"><button class="ghost" data-focus>Focus</button><button class="ghost" data-del aria-label="Delete">✕</button></div>
+    </div>`}).join(""):`<div class="empty">${S.tasks.length?"No tasks match these filters.":"No tasks yet. Add your first one above."}</div>`;
+  renderTaskExtras();
+  $("hist").innerHTML=S.history.length?S.history.map(h=>`<div class="hi"><span class="dot" style="background:${TYPE_COL[h.type]||"var(--muted)"}"></span><div>${esc(h.text)}<small>${fmtT(h.t)}</small></div></div>`).join(""):`<div class="empty">History appears here as you work.</div>`;
+}
+
+/* ===== Extra content ===== */
+const QUOTES=['Small steps every day beat one big sprint.','Done is better than perfect.','Your future self is watching what you do today.','Start with five minutes. Momentum does the rest.','Confusion is a signal to slow down and explain it.','Rest is part of the plan, not a reward for skipping it.','You do not have to feel ready. You just have to begin.'];
+const BEST={pomo:'Long tasks you keep postponing, and days full of interruptions.',recall:'Exams, memorising definitions, and anything you think you know but cannot explain.',spaced:'Long-term subjects like languages, formulas and vocabulary.',feyn:'Concepts that feel clear until you try to explain them.',inter:'Maths and problem sets where the method is not obvious yet.'};
+function renderDashExtras(){
+  $('quote').textContent='“'+QUOTES[new Date().getDate()%QUOTES.length]+'”';
+  const today=dk();
+  const pend=S.tasks.filter(t=>!t.done).sort((a,b)=>PRI[b.priority]-PRI[a.priority]||(a.due||'~').localeCompare(b.due||'~')).slice(0,3);
+  $('plan').innerHTML=pend.length?pend.map((t,i)=>`<div class='plan-i'><span class='pri' style='--c:${PRI_COL[t.priority]}'>${i+1}</span><div style='flex:1'>${esc(t.title)}<div class='muted' style='font-size:12px'>${esc(t.subject)}${t.due===today?' · due today':''}</div></div><button class='btn sm' data-startplan='${t.id}'>Focus</button></div>`).join(''):`<div class='empty'>Nothing urgent. Add a task or enjoy the break ☕</div>`;
+  const total=S.tasks.length,done=S.tasks.filter(t=>t.done).length,rate=total?Math.round(done/total*100):0;
+  const bySub={};S.sessions.forEach(s=>bySub[s.subject]=(bySub[s.subject]||0)+s.mins);
+  const top=Object.entries(bySub).sort((a,b)=>b[1]-a[1])[0];
+  $('insights').innerHTML=`<div class='ins'><div><b>${rate}%</b>Task completion rate</div><div><b>${S.sessions.length}</b>Focus blocks completed</div><div><b>${top?esc(top[0]):'—'}</b>${top?`Most-studied subject (${top[1]} min)`:'Your top subject appears after your first session'}</div></div>`;
+}
+$('plan').addEventListener('click',e=>{const b=e.target.closest('[data-startplan]');if(!b)return;$('fTask').value=b.dataset.startplan;document.querySelector('[data-view="focus"]').click()});
+function renderTaskExtras(){
+  const total=S.tasks.length,done=S.tasks.filter(t=>t.done).length,pct=total?Math.round(done/total*100):0;
+  $('taskSummary').innerHTML=`<div style='display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px'><b>${done} of ${total} tasks complete</b><span>${pct}%</span></div><div class='bar-track'><div class='bar-fill' style='width:${pct}%'></div></div>`;
+  const COL=['#7c3aed','#ec4899','#0ea5e9','#00b8a0','#f59e0b','#84cc16','#ff5d73'];
+  $('subjGrid').innerHTML=SUBJ.map((s,i)=>{const a=S.tasks.filter(t=>t.subject===s&&!t.done).length,d=S.tasks.filter(t=>t.subject===s&&t.done).length;return `<div class='sg' style='--c:${COL[i]}'>${s}<b>${a}</b><span>active · ${d} done</span></div>`}).join('');
+}
+function renderFocusExtras(){
+  const today=dk(),weekAgo=Date.now()-6*86400000;
+  const todaySess=S.sessions.filter(s=>s.day===today).length;
+  const week=S.sessions.filter(s=>s.t>=weekAgo).reduce((a,s)=>a+s.mins,0);
+  const avg=S.sessions.length?Math.round(totalMins()/S.sessions.length):0;
+  $('focusKpis').innerHTML=[['Blocks today',todaySess],['Minutes this week',week],['All-time blocks',S.sessions.length],['Avg block (min)',avg]].map(([l,v])=>`<div class='kpi'><b>${v}</b><span>${l}</span></div>`).join('');
+}
+function renderLevels(){
+  const counts=[0,1,2,3,4].map(l=>S.cards.filter(c=>c.box===l).length);const max=Math.max(1,...counts);
+  $('levels').innerHTML=counts.map((n,l)=>`<div class='lv'><i style='height:${Math.max(6,n/max*70)}px'></i>L${l}<br><b>${n}</b></div>`).join('');
+}
+let eyeBreakT=null;
+$('eyeBreak').onclick=()=>{let n=20;clearInterval(eyeBreakT);$('eyeMsg').textContent=`Look 20 feet away… ${n}`;eyeBreakT=setInterval(()=>{n--;if(n<=0){clearInterval(eyeBreakT);$('eyeMsg').textContent='Eyes rested. Blink slowly a few times 👀';return}$('eyeMsg').textContent=`Look 20 feet away… ${n}`},1000)};
+
+/* ===== Focus timer ===== */
+const MODES={work:25,short:5,long:15};
+let mode="work",left=25*60,running=false,endAt=0,iv=null,blocks=0;
+const fmt=s=>String(Math.floor(s/60)).padStart(2,"0")+":"+String(s%60).padStart(2,"0");
+function drawClock(){$("clock").textContent=fmt(left);document.title=fmt(left)+" · Focus Time"}
+function stopClock(){clearInterval(iv);iv=null;running=false}
+function setMode(m){
+  stopClock();mode=m;left=MODES[m]*60;
+  document.querySelectorAll("[data-mode]").forEach(b=>b.classList.toggle("on",b.dataset.mode===m));
+  $("tStart").textContent="Start";$("tCap").textContent=m==="work"?"Ready when you are":"Take a breather. You’ve earned it.";drawClock();
+}
+function tick(){
+  left=Math.max(0,Math.ceil((endAt-Date.now())/1000));drawClock();
+  if(left>0)return;
+  stopClock();
+  if(mode==="work"){
+    blocks++;
+    const taskId=Number($("fTask").value)||null,subject=$("fSubj").value;
+    S.sessions.push({t:Date.now(),day:dk(),mins:MODES.work,subject,taskId});
+    if(taskId){const t=S.tasks.find(x=>x.id===taskId);if(t)t.pomos++}
+    log(`Focused ${MODES.work} min on ${subject}`,"focus");save();renderAll();
+    toast("Focus block saved. Take a short break 🌿");
+    setMode(blocks%4===0?"long":"short");
+  }else{setMode("work");toast("Break over. Ready for another block?")}
+}
+$("tStart").onclick=()=>{
+  if(running){stopClock();$("tStart").textContent="Resume";$("tCap").textContent="Paused";return}
+  if(left<=0)left=MODES[mode]*60;
+  running=true;endAt=Date.now()+left*1000;iv=setInterval(tick,250);
+  $("tStart").textContent="Pause";$("tCap").textContent=mode==="work"?"In focus. One thing at a time.":"Break running. Look away from the screen.";
+};
+$("tReset").onclick=()=>setMode(mode);
+document.querySelectorAll("[data-mode]").forEach(b=>b.onclick=()=>setMode(b.dataset.mode));
+function renderFocus(){
+  const cur=$("fTask").value;
+  $("fTask").innerHTML=`<option value="">No linked task</option>`+S.tasks.filter(t=>!t.done).map(t=>`<option value="${t.id}">${esc(t.title)}</option>`).join("");
+  $("fTask").value=cur;
+  $("cycles").textContent=`Focus blocks this session: ${blocks} · Total logged: ${totalMins()} min`;
+  $("sLog").innerHTML=S.sessions.length?[...S.sessions].reverse().slice(0,25).map(s=>{
+    const t=S.tasks.find(x=>x.id===s.taskId);
+    return `<div class="hi"><span class="dot" style="background:var(--sky)"></span><div>${esc(s.subject)}${t?` · ${esc(t.title)}`:""}<small>${s.mins} min · ${fmtT(s.t)}</small></div></div>`}).join(""):`<div class="empty">No sessions yet.</div>`;
+  $("goalIn").value=S.goal;renderFocusExtras();
+}
+$("saveGoal").onclick=()=>{const n=Number($("goalIn").value);if(n<15||n>720){toast("Goal must be 15–720 minutes.");return}S.goal=n;save();renderAll();toast("Goal saved.")};
+$("eyeToggle").onchange=e=>setEye(e.target.checked);
+let eyeIv=null;
+function setEye(on){
+  clearInterval(eyeIv);eyeIv=on?setInterval(()=>toast("👀 20-20-20: look 20 feet away for 20 seconds"),20*60*1000):null;
+  S.eyeReminder=on;S.eye=on;$("eyeToggle").checked=on;save();
+}
+
+/* ===== Flashcards ===== */
+let fcCur=null,fcShown=false;
+function pickCard(){
+  if(!S.cards.length){fcCur=null;return}
+  const pool=[...S.cards].sort((a,b)=>a.box-b.box||Math.random()-.5);
+  let c=pool[0];if(c.id===fcCur&&pool.length>1)c=pool[1];
+  fcCur=c.id;fcShown=false;
+}
+$("fcForm").addEventListener("submit",e=>{
+  e.preventDefault();
+  S.cards.push({id:Date.now(),front:$("fcFront").value.trim().slice(0,200),back:$("fcBack").value.trim().slice(0,300),box:0});
+  $("fcFront").value="";$("fcBack").value="";
+  log("Created a flashcard","card");save();if(!fcCur)pickCard();renderAll();toast("Card added.");
+});
+$("fcShow").onclick=()=>{fcShown=true;renderCards()};
+$("fcGood").onclick=()=>{const c=S.cards.find(x=>x.id===fcCur);if(c){c.box=Math.min(4,c.box+1);save()}pickCard();renderAll()};
+$("fcAgain").onclick=()=>{const c=S.cards.find(x=>x.id===fcCur);if(c){c.box=0;save()}pickCard();renderAll()};
+$("fcList").addEventListener("click",e=>{
+  const b=e.target.closest("[data-cdel]");if(!b)return;
+  S.cards=S.cards.filter(c=>String(c.id)!==b.dataset.cdel);if(String(fcCur)===b.dataset.cdel)pickCard();save();renderAll();
+});
+function renderCards(){
+  const c=S.cards.find(x=>x.id===fcCur);
+  const hasCard=!!c;
+  $("fcFace").textContent=hasCard?(fcShown?c.back:c.front):"Add a card to begin";
+  $("fcHint").textContent=hasCard?(fcShown?"How did you do?":"Try to recall the answer first."):"";
+  $("fcShow").style.display=hasCard&&!fcShown?"inline-block":"none";
+  $("fcGrade").style.display=hasCard&&fcShown?"flex":"none";
+  $("fcAct").style.display=hasCard?"flex":"none";
+  const mastered=S.cards.filter(x=>x.box>=3).length;
+  $("fcStats").textContent=`${S.cards.length} card(s) · ${mastered} mastered`;
+  renderLevels();
+  $("fcList").innerHTML=S.cards.length?S.cards.map(x=>`<div class="row"><div class="rt"><div class="rtitle">${esc(x.front)}</div><div class="rmeta">${esc(x.back)} · level ${x.box}/4</div></div><div class="ract"><button class="ghost" data-cdel="${x.id}" aria-label="Delete card">✕</button></div></div>`).join(""):`<div class="empty">Your deck is empty.</div>`;
+}
+
+/* ===== Techniques ===== */
+const TECHS=[
+ {id:"pomo",ic:"🍅",name:"Pomodoro",desc:"25 minutes of focus, then a short break.",steps:["Pick one task.","Set the timer to 25 minutes and work only on that task.","Take a 5-minute break when it rings.","After four blocks, take a longer 15-minute break."],why:"Short, bounded sprints make starting easier and stop drifting."},
+ {id:"recall",ic:"🧠",name:"Active recall",desc:"Close your notes and pull the answers from memory.",steps:["Read a section once.","Close the book or notes.","Write or say everything you remember.","Check what you missed and try those parts again."],why:"Retrieving information strengthens memory far more than re-reading it."},
+ {id:"spaced",ic:"📅",name:"Spaced repetition",desc:"Review material at growing intervals.",steps:["Review new material the next day.","Review again after 3 days, then a week, then two weeks.","Shorten the interval for anything you forget.","Use the Flashcards tab to schedule the hard ones."],why:"You relearn just before you would forget, the cheapest route to long-term memory."},
+ {id:"feyn",ic:"💬",name:"Feynman method",desc:"Explain a topic in plain words, as if to a 12-year-old.",steps:["Write the topic at the top of a page.","Explain it simply, without jargon.","Mark each point where you got stuck.","Go back to the source, fill those gaps, and explain again."],why:"The places you can't explain are where your understanding is weakest."},
+ {id:"inter",ic:"🔀",name:"Interleaving",desc:"Mix related topics or problem types in one session.",steps:["List two or three related topics.","Practise them in shuffled order, not block by block.","Notice which type you confuse.","Spend extra time on that confusing pair."],why:"Switching types forces you to identify the problem, which builds real skill."}
+];
+function renderTechs(active="pomo"){
+  $("techGrid").innerHTML=TECHS.map(t=>`<button class="tech ${t.id===active?"on":""}" data-tech="${t.id}"><div class="ic">${t.ic}</div><h3>${t.name}</h3><p>${t.desc}</p></button>`).join("");
+  const t=TECHS.find(x=>x.id===active);
+  $("techDetail").innerHTML=`<h2>${t.ic} ${t.name}</h2><div class="tip-box">Best for: ${esc(BEST[t.id])}</div><ol>${t.steps.map(s=>`<li>${esc(s)}</li>`).join("")}</ol><div class="why"><b>Why it works:</b> ${esc(t.why)}</div>`;
+}
+$("techGrid").addEventListener("click",e=>{const b=e.target.closest("[data-tech]");if(b)renderTechs(b.dataset.tech)});
+
+/* ===== Memory match ===== */
+const EMO=["🍎","🌿","📘","⭐","🎵","🔷","🌙","🧠"];
+let mLock=false,mFirst=null,mMoves=0,mFound=0;
+const shuffle=a=>{for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a};
+function memNew(){
+  const deck=shuffle([...EMO,...EMO]);mFirst=null;mLock=false;mMoves=0;mFound=0;
+  $("mMoves").textContent=0;$("memMsg").textContent="";
+  $("memGrid").innerHTML=deck.map((e,i)=>`<button class="cell" data-e="${e}" aria-label="Card ${i+1}"></button>`).join("");
+  $("mBest").textContent=S.best.memory!==undefined?S.best.memory:"—";
+}
+$("memGrid").addEventListener("click",e=>{
+  const c=e.target.closest(".cell");
+  if(!c||mLock||c.classList.contains("open")||c.classList.contains("match"))return;
+  c.classList.add("open");c.textContent=c.dataset.e;
+  if(!mFirst){mFirst=c;return}
+  mMoves++;$("mMoves").textContent=mMoves;
+  if(mFirst.dataset.e===c.dataset.e){
+    mFirst.classList.add("match");c.classList.add("match");mFirst=null;mFound++;
+    if(mFound===EMO.length){
+      if(S.best.memory===undefined||mMoves<S.best.memory){S.best.memory=mMoves;save()}
+      $("memMsg").innerHTML=`<span class="ok">Cleared in ${mMoves} moves!</span>`;
+      $("mBest").textContent=S.best.memory;
+    }
+  }else{
+    mLock=true;const a=mFirst,b=c;
+    setTimeout(()=>{[a,b].forEach(x=>{x.classList.remove("open");x.textContent=""});mFirst=null;mLock=false},700);
+  }
+});
+$("memNew").onclick=memNew;
+
+/* ===== Number recall ===== */
+let rLevel=3,rTarget="",rPhase="idle",rTimer=null;
+function rRound(){
+  $("rLevel").textContent=rLevel;$("rBest").textContent=S.best.recall||"—";
+  rTarget=String(Math.floor(Math.random()*10**rLevel)).padStart(rLevel,"0");
+  rPhase="show";$("rIn").disabled=true;$("rCheck").disabled=true;$("rIn").value="";
+  $("rStart").disabled=true;$("rMsg").textContent="";
+  $("rDigits").textContent=rTarget;
+  rTimer=setTimeout(()=>{rPhase="type";$("rDigits").textContent="? ".repeat(rLevel).trim();$("rIn").disabled=false;$("rCheck").disabled=false;$("rIn").focus()},900+rLevel*450);
+}
+function rCheck(){
+  if(rPhase!=="type")return;
+  if($("rIn").value.trim()===rTarget){
+    rLevel++;rPhase="idle";$("rMsg").innerHTML=`<span class="ok">Correct! Next round: ${rLevel} digits.</span>`;
+    setTimeout(rRound,900);
+  }else{
+    const reached=rLevel-1;
+    if(reached>(S.best.recall||0)){S.best.recall=reached;save()}
+    rPhase="idle";$("rDigits").textContent=rTarget;$("rIn").disabled=true;$("rCheck").disabled=true;
+    $("rMsg").innerHTML=`<span class="bad">Not quite. You reached level ${reached}.</span>`;
+    $("rStart").disabled=false;$("rStart").textContent="Try again";$("rBest").textContent=S.best.recall||"—";
+  }
+}
+$("rStart").onclick=()=>{rLevel=3;rRound()};
+$("rCheck").onclick=rCheck;
+$("rIn").addEventListener("keydown",e=>{if(e.key==="Enter")rCheck()});
+
+/* ===== Reaction test ===== */
+let rxT=null,rxGo=0,rxState="idle";
+function rxSet(t,c){const a=$("rxArea");a.textContent=t;a.style.background=c}
+$("rxArea").onclick=()=>{
+  if(rxState==="idle"){rxState="wait";rxSet("Wait for green…","var(--sun)");rxT=setTimeout(()=>{rxState="go";rxGo=performance.now();rxSet("Click now!","var(--teal)")},1200+Math.random()*2800);return}
+  if(rxState==="wait"){clearTimeout(rxT);rxState="idle";rxSet("Too early! Click to try again","var(--coral)");return}
+  const ms=Math.round(performance.now()-rxGo);rxState="idle";
+  if(!S.best.reaction||ms<S.best.reaction){S.best.reaction=ms;save()}
+  $("rxBest").textContent=S.best.reaction+" ms";rxSet(`${ms} ms · click to go again`,"var(--violet)");
+};
+
+/* ===== Badges ===== */
+const BADGES=[
+ {id:"first",ic:"🌱",name:"First step",ok:()=>S.tasks.some(t=>t.done)},
+ {id:"five",ic:"🎯",name:"Five done",ok:()=>S.tasks.filter(t=>t.done).length>=5},
+ {id:"ten",ic:"🏆",name:"Ten done",ok:()=>S.tasks.filter(t=>t.done).length>=10},
+ {id:"hour",ic:"⏳",name:"One focused hour",ok:()=>totalMins()>=60},
+ {id:"streak3",ic:"🔥",name:"3-day streak",ok:()=>streak()>=3},
+ {id:"deck",ic:"🃏",name:"Deck of 10",ok:()=>S.cards.length>=10},
+ {id:"memory",ic:"🧩",name:"Memory pro",ok:()=>S.best.memory!==undefined&&S.best.memory<=12}
+];
+function checkBadges(){
+  const now=BADGES.filter(b=>b.ok()).map(b=>b.id);
+  const fresh=now.filter(id=>!S.badges.includes(id));
+  if(fresh.length){const b=BADGES.find(x=>x.id===fresh[0]);toast(`${b.ic} Badge unlocked: ${b.name}`)}
+  S.badges=now;
+}
+
+/* ===== Dashboard ===== */
+function renderDash(){
+  const h=new Date().getHours();
+  $("gTitle").textContent=(h<12?"Good morning":h<18?"Good afternoon":"Good evening")+" — let’s make progress.";
+  const total=S.tasks.length,done=S.tasks.filter(t=>t.done).length,m=minsOn(dk()),g=Math.min(100,Math.round(m/S.goal*100));
+  $("stTotal").textContent=total;$("stActive").textContent=total-done;$("stDone").textContent=done;$("stFocus").textContent=m+"m";
+  $("ring").style.setProperty("--a",g*3.6+"deg");$("ringTxt").textContent=g+"%";
+  $("goalSub").textContent=`${m} of ${S.goal} min today · ${streak()}-day streak`;
+  const days=[];for(let i=6;i>=0;i--){const d=new Date();d.setDate(d.getDate()-i);days.push({l:d.toLocaleDateString(undefined,{weekday:"short"}),m:minsOn(dk(d)),today:i===0})}
+  const max=Math.max(30,...days.map(x=>x.m));
+  $("week").innerHTML=days.map(x=>`<div class="wb"><div class="wbar ${x.today?"today":""}" style="height:${Math.max(6,x.m/max*100)}%" title="${x.m} min"></div><small>${x.l}</small></div>`).join("");
+  const got=new Set(S.badges);
+  $("badges").innerHTML=BADGES.map(b=>`<div class="badge ${got.has(b.id)?"got":""}"><span>${b.ic}</span>${b.name}</div>`).join("");
+  $("recent").innerHTML=S.history.slice(0,6).map(h=>`<div class="hi"><span class="dot" style="background:${TYPE_COL[h.type]||"var(--muted)"}"></span><div>${esc(h.text)}<small>${fmtT(h.t)}</small></div></div>`).join("")||`<div class="empty">Activity shows up here.</div>`;
+}
+
+/* ===== Render & init ===== */
+function renderAll(){
+  checkBadges();
+  renderDash();renderDashExtras();renderTasks();renderFocus();renderCards();
+}
+SUBJ.forEach(s=>{
+  const o=`<option>${s}</option>`;
+  $("tSubjIn").insertAdjacentHTML("beforeend",o);
+  $("fSubj").insertAdjacentHTML("beforeend",o);
+  $("tSubFilter").insertAdjacentHTML("beforeend",o);
+});
+$("tSubFilter").insertAdjacentHTML("afterbegin",`<option value="all">All subjects</option>`);
+$("tSubFilter").value="all";
+$("tSubjIn").value="General";$("fSubj").value="General";
+renderTechs();memNew();setMode("work");
+setTheme(S.theme);
+setEye(!!S.eyeReminder);
+pickCard();renderAll();
+/* ===== Calm Sounds ===== */
+let actx=null,master=null,noiseSrc=null,padOsc=[],curSnd=null;
+const SND_NAME={rain:'Gentle rain',brown:'Deep brown',pad:'Soft pad'};
+function ensureAudio(){if(!actx){actx=new (window.AudioContext||window.webkitAudioContext)();master=actx.createGain();master.gain.value=$('vol').value/250;master.connect(actx.destination)}if(actx.state==='suspended')actx.resume()}
+function noiseBuf(brown){const len=actx.sampleRate*4,buf=actx.createBuffer(1,len,actx.sampleRate),d=buf.getChannelData(0);let last=0;for(let i=0;i<len;i++){const w=Math.random()*2-1;if(brown){last=(last+0.02*w)/1.02;d[i]=last*3.5}else d[i]=w}return buf}
+function stopSound(){if(noiseSrc){try{noiseSrc.stop()}catch(e){}noiseSrc=null}padOsc.forEach(o=>{try{o.stop()}catch(e){}});padOsc=[];curSnd=null;document.querySelectorAll('.snd').forEach(b=>b.classList.remove('on'));$('sndStatus').textContent='Silent. Press a sound to begin.'}
+function playSnd(k){
+  if(curSnd===k){stopSound();return}
+  stopSound();ensureAudio();curSnd=k;
+  if(k==='pad'){[261.63,329.63,392].forEach((f,i)=>{const o=actx.createOscillator(),g=actx.createGain();o.type='sine';o.frequency.value=f;g.gain.value=0;g.gain.linearRampToValueAtTime(0.3/(i+1),actx.currentTime+3);o.connect(g).connect(master);o.start();padOsc.push(o)})}
+  else{const s=actx.createBufferSource(),f=actx.createBiquadFilter();s.buffer=noiseBuf(k==='brown');s.loop=true;f.type='lowpass';f.frequency.value=k==='brown'?400:2000;s.connect(f).connect(master);s.start();noiseSrc=s}
+  document.querySelector(`.snd[data-snd='${k}']`).classList.add('on');
+  $('sndStatus').textContent=`Playing: ${SND_NAME[k]}. Tap again to stop.`;
+}
+document.querySelectorAll('.snd').forEach(b=>b.onclick=()=>playSnd(b.dataset.snd));
+$('vol').oninput=()=>{if(master)master.gain.value=$('vol').value/250};
+
+/* ===== Sudoku ===== */
+let sdSol=[],sdPuz=[],sdUser=[],sdSel=-1,sdLvl='easy',sdT0=0;
+const sdOk=(b,i,n)=>{const r=i/9|0,c=i%9;for(let k=0;k<9;k++){if(b[r*9+k]===n||b[k*9+c]===n)return false}const br=r-r%3,bc=c-c%3;for(let a=0;a<3;a++)for(let d=0;d<3;d++)if(b[(br+a)*9+bc+d]===n)return false;return true};
+function sdFill(b){const i=b.indexOf(0);if(i<0)return true;const nums=[1,2,3,4,5,6,7,8,9].sort(()=>Math.random()-.5);for(const n of nums){if(sdOk(b,i,n)){b[i]=n;if(sdFill(b))return true;b[i]=0}}return false}
+function sdGen(){const b=Array(81).fill(0);sdFill(b);sdSol=b;const holes={easy:34,medium:44,hard:52}[sdLvl];const idx=[...Array(81).keys()].sort(()=>Math.random()-.5).slice(0,holes);sdPuz=[...sdSol];idx.forEach(i=>sdPuz[i]=0);sdUser=[...sdPuz];sdSel=-1;sdT0=Date.now();$('sdMsg').textContent='';sdDraw()}
+function sdDraw(){
+  $('sdGrid').innerHTML=sdUser.map((v,i)=>{const r=i/9|0,c=i%9,g=sdPuz[i]!==0,w=!g&&v!==0&&v!==sdSol[i];return `<button class='sc ${c%3===2&&c<8?'br':''} ${r%3===2&&r<8?'bb':''} ${g?'g':''} ${i===sdSel?'s':''} ${w?'w':''}' data-i='${i}'>${v||''}</button>`}).join('');
+  $('sdPad').innerHTML=[1,2,3,4,5,6,7,8,9,'⌫'].map(n=>`<button data-n='${n==='⌫'?0:n}'>${n}</button>`).join('');
+}
+function sdWin(){if(sdUser.every((v,i)=>v===sdSol[i])){const mins=((Date.now()-sdT0)/60000).toFixed(1);$('sdMsg').innerHTML=`<span class='ok'>Solved in ${mins} min. Lovely work 🌸</span>`;toast('Puzzle solved! 🌸')}}
+$('sdGrid').onclick=e=>{const b=e.target.closest('.sc');if(!b)return;sdSel=+b.dataset.i;sdDraw()};
+$('sdPad').onclick=e=>{const b=e.target.closest('button');if(!b||sdSel<0||sdPuz[sdSel])return;sdUser[sdSel]=+b.dataset.n;sdDraw();sdWin()};
+document.addEventListener('keydown',e=>{if(!$('v-sudoku').classList.contains('on')||sdSel<0||sdPuz[sdSel])return;if(/^[1-9]$/.test(e.key)){sdUser[sdSel]=+e.key;sdDraw();sdWin()}if(e.key==='Backspace'||e.key==='Delete'){sdUser[sdSel]=0;sdDraw()}});
+$('sdCheck').onclick=()=>{const bad=sdUser.filter((v,i)=>v&&v!==sdSol[i]).length;$('sdMsg').textContent=bad?`${bad} cell(s) look wrong. Check the red ones.`:'Everything filled so far is correct.'};
+$('sdHint').onclick=()=>{const i=sdUser.findIndex((v,j)=>sdPuz[j]===0&&v!==sdSol[j]);if(i<0)return;sdUser[i]=sdSol[i];sdDraw();sdWin()};
+$('sdNew').onclick=sdGen;
+document.querySelectorAll('[data-lvl]').forEach(b=>b.onclick=()=>{sdLvl=b.dataset.lvl;document.querySelectorAll('[data-lvl]').forEach(x=>x.classList.toggle('on',x===b));sdGen()});
+
+/* ===== Chess ===== */
+const CVAL={P:1,N:3,B:3,R:5,Q:9,K:0};
+const GLYPH={K:'♚',Q:'♛',R:'♜',B:'♝',N:'♞',P:'♟'};
+const inB=(r,c)=>r>=0&&r<8&&c>=0&&c<8;
+let ch={b:[],turn:'w',sel:-1,moves:[],over:'',check:false};
+function pseudo(b,from,col){const p=b[from];if(!p||p[0]!==col)return[];const t=p[1],r=from>>3,c=from&7,out=[];
+  const add=(rr,cc)=>{if(!inB(rr,cc))return false;const to=rr*8+cc,q=b[to];if(!q){out.push(to);return true}if(q[0]!==col)out.push(to);return false};
+  if(t==='P'){const d=col==='w'?-1:1,start=col==='w'?6:1;if(inB(r+d,c)&&!b[(r+d)*8+c]){out.push((r+d)*8+c);if(r===start&&!b[(r+2*d)*8+c])out.push((r+2*d)*8+c)}for(const dc of[-1,1]){if(!inB(r+d,c+dc))continue;const to=(r+d)*8+c+dc;if(b[to]&&b[to][0]!==col)out.push(to)}}
+  else if(t==='N'){[[1,2],[2,1],[-1,2],[-2,1],[1,-2],[2,-1],[-1,-2],[-2,-1]].forEach(([dr,dc])=>add(r+dr,c+dc))}
+  else if(t==='K'){for(let dr=-1;dr<=1;dr++)for(let dc=-1;dc<=1;dc++)if(dr||dc)add(r+dr,c+dc)}
+  else{const dirs=[];if(t!=='B')dirs.push([1,0],[-1,0],[0,1],[0,-1]);if(t!=='R')dirs.push([1,1],[1,-1],[-1,1],[-1,-1]);for(const[dr,dc]of dirs){let rr=r+dr,cc=c+dc;while(add(rr,cc)){rr+=dr;cc+=dc}}}
+  return out}
+function attacked(b,sq,by){const r=sq>>3,c=sq&7;
+  for(const dc of[-1,1]){const rr=r+(by==='w'?1:-1),cc=c+dc;if(inB(rr,cc)&&b[rr*8+cc]===by+'P')return true}
+  for(const[dr,dc]of[[1,2],[2,1],[-1,2],[-2,1],[1,-2],[2,-1],[-1,-2],[-2,-1]]){const rr=r+dr,cc=c+dc;if(inB(rr,cc)&&b[rr*8+cc]===by+'N')return true}
+  for(let dr=-1;dr<=1;dr++)for(let dc=-1;dc<=1;dc++){if(!dr&&!dc)continue;const rr=r+dr,cc=c+dc;if(inB(rr,cc)&&b[rr*8+cc]===by+'K')return true}
+  for(const[ds,types]of[[[[1,1],[1,-1],[-1,1],[-1,-1]],'BQ'],[[[1,0],[-1,0],[0,1],[0,-1]],'RQ']])for(const[dr,dc]of ds){let rr=r+dr,cc=c+dc;while(inB(rr,cc)){const p=b[rr*8+cc];if(p){if(p[0]===by&&types.includes(p[1]))return true;break}rr+=dr;cc+=dc}}
+  return false}
+function legal(b,col){const out=[];for(let i=0;i<64;i++){const p=b[i];if(!p||p[0]!==col)continue;for(const to of pseudo(b,i,col)){const nb=b.slice();nb[to]=p;nb[i]=null;if(p[1]==='P'&&(to>>3)===(col==='w'?0:7))nb[to]=col+'Q';if(!attacked(nb,nb.indexOf(col+'K'),col==='w'?'b':'w'))out.push({from:i,to,nb})}}return out}
+function chStart(){const back='RNBQKBNR';const b=Array(64).fill(null);for(let c=0;c<8;c++){b[c]='b'+back[c];b[8+c]='bP';b[48+c]='wP';b[56+c]='w'+back[c]}ch={b,turn:'w',sel:-1,moves:[],over:'',check:false};chDraw()}
+function chEnd(){const inChk=attacked(ch.b,ch.b.indexOf(ch.turn+'K'),ch.turn==='w'?'b':'w');ch.check=inChk;if(!legal(ch.b,ch.turn).length){ch.over=inChk?(ch.turn==='w'?'Computer':'You')+' wins by checkmate':'Stalemate. A draw.';if(inChk&&ch.turn==='b'){S.best.chess=(S.best.chess||0)+1;save()}}}
+function chClick(i){
+  if(ch.turn!=='w'||ch.over)return;
+  const mv=ch.moves.find(m=>m.to===i);
+  if(ch.sel>=0&&mv){ch.b=mv.nb;ch.sel=-1;ch.moves=[];ch.turn='b';chEnd();chDraw();if(!ch.over)setTimeout(chAI,450);return}
+  const p=ch.b[i];
+  if(p&&p[0]==='w'){ch.sel=i;ch.moves=legal(ch.b,'w').filter(m=>m.from===i)}else{ch.sel=-1;ch.moves=[]}
+  chDraw();
+}
+function chAI(){const ms=legal(ch.b,'b');if(!ms.length){chEnd();chDraw();return}ms.sort(()=>Math.random()-.5);const val=m=>ch.b[m.to]?CVAL[ch.b[m.to][1]]:0;const best=ms.reduce((a,m)=>val(m)>val(a)?m:a);ch.b=best.nb;ch.turn='w';chEnd();chDraw()}
+function chDraw(){
+  const kingSq=ch.check?ch.b.indexOf(ch.turn+'K'):-1;const targets=new Set(ch.moves.map(m=>m.to));
+  $('chBoard').innerHTML=ch.b.map((p,i)=>{const dark=((i>>3)+(i&7))%2===1;return `<button class='sq ${dark?'dk':'lt'} ${i===ch.sel?'sel':''} ${targets.has(i)?'mv':''} ${i===kingSq?'ck':''}' data-i='${i}'>${p?`<span class='${p[0]==='w'?'wp':'bp'}'>${GLYPH[p[1]]}</span>`:''}</button>`}).join('');
+  $('chStatus').textContent=ch.over?ch.over:(ch.turn==='w'?(ch.check?'Your move. You are in check!':'Your move. You play White.'):'Computer is thinking…');
+  $('chWins').textContent=S.best.chess||0;
+}
+$('chBoard').onclick=e=>{const b=e.target.closest('.sq');if(b)chClick(+b.dataset.i)};
+$('chNew').onclick=chStart;
+
+/* ===== Type Sprint ===== */
+const TYX={home:['asdf jkl; asdf jkl; fjfj dkdk slsl a;a;','sad lad fall flask dad salad jak fads','glad shall dash ask flags half'],words:['the quick brown fox jumps over the lazy dog','people learn best when they practise little and often','a calm mind and steady hands make better work'],sent:['Small steps every day lead to big results.','Focus is a muscle that grows when you train it gently.','Read it once, close the book, then write what you remember.']};
+let tyKey='home',tyText='',tyT0=0;
+function tyDraw(typed){$('tyText').innerHTML=[...tyText].map((c,i)=>{let k='';if(i<typed.length)k=typed[i]===c?'tg':'tb';else if(i===typed.length)k='cur';return `<span class='${k}'>${c===' '?'&nbsp;':esc(c)}</span>`}).join('')}
+function tyNew(){const arr=TYX[tyKey];tyText=arr[Math.floor(Math.random()*arr.length)];$('tyIn').value='';tyT0=0;$('tyWpm').textContent='—';$('tyAcc').textContent='—';tyDraw('')}
+$('tyIn').addEventListener('input',e=>{
+  const v=e.target.value;if(!tyT0&&v.length)tyT0=Date.now();
+  tyDraw(v);
+  if(v.length>=tyText.length){
+    const mins=Math.max((Date.now()-tyT0)/60000,1/600);
+    const correct=[...tyText].filter((c,i)=>v[i]===c).length;
+    const wpm=Math.round((tyText.length/5)/mins),acc=Math.round(correct/tyText.length*100);
+    $('tyWpm').textContent=wpm;$('tyAcc').textContent=acc+'%';
+    if(acc>=90&&(!S.best.typing||wpm>S.best.typing)){S.best.typing=wpm;save()}
+    $('tyBest').textContent=S.best.typing||'—';
+    toast(`${wpm} WPM at ${acc}% accuracy`);
+    e.target.disabled=true;setTimeout(()=>{e.target.disabled=false;tyNew()},1600);
+  }
+});
+$('tyNext').onclick=tyNew;
+document.querySelectorAll('[data-ty]').forEach(b=>b.onclick=()=>{tyKey=b.dataset.ty;document.querySelectorAll('[data-ty]').forEach(x=>x.classList.toggle('on',x===b));tyNew()});
+
+/* ===== Init extras ===== */
+sdGen();chStart();tyNew();
+$('tyBest').textContent=S.best.typing||'—';
+</script>
+</body>
+</html>
